@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Petualangan di Data Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf1dc;--ink:#4a3324;--card:#fffaf0;--line:#e3c9a0;--acc:#d9622b}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#2a1f18;--ink:#f6e7d2;--card:#3b2c22;--line:#5a4433}}
+:root[data-theme=dark]{--bg:#2a1f18;--ink:#f6e7d2;--card:#3b2c22;--line:#5a4433}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Baloo 2","Comic Sans MS","Trebuchet MS",sans-serif}
+#app{max-width:980px;margin:0 auto;padding:10px}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+h1{font-size:clamp(18px,4.5vw,28px);margin:4px 0}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:2px 12px;font:inherit;cursor:pointer}
+.chip.on{background:#bfe8c4;color:#1d4a2a;border-color:#5aa469}
+.tip{font-size:14px;opacity:.8;margin:6px 2px}
+.b{font:inherit;background:var(--acc);color:#fff;border:0;border-radius:12px;padding:5px 14px;cursor:pointer;box-shadow:0 3px 0 #94401a}.b:active{transform:translateY(2px);box-shadow:none}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#scene{container-type:inline-size;position:relative;aspect-ratio:16/9;min-height:300px;border-radius:18px;overflow:hidden;border:4px solid #8b5a2b;user-select:none;
+background:linear-gradient(#ffe3b8 0 48%,#b57a45 48% 50%,transparent 50%),repeating-conic-gradient(#ecc99b 0 25%,#dfb281 0 50%) 0 0/8cqw 8cqw}
+.win{position:absolute;top:6%;width:13%;height:24%;background:linear-gradient(#9fd8ff,#e9f7ff);border:5px solid #8b5a2b;border-radius:10px 10px 0 0}
+.board{position:absolute;left:43%;top:7%;width:14%;padding:4px;background:#2f4a3a;color:#fff;border:5px solid #8b5a2b;border-radius:6px;text-align:center;font-size:2.4cqw}
+.ctr{position:absolute;top:59%;height:11%;background:linear-gradient(#a8703d,#8b5a2b);border-top:4px solid #cf9660;border-radius:8px 8px 0 0;z-index:70}
+.ctr i{position:absolute;bottom:100%;right:6%;font-style:normal;font-size:4cqw}
+.dc{position:absolute;font-size:5cqw;z-index:71}
+.actor{position:absolute;width:8%;min-width:40px;transform:translate(-50%,-100%)}
+.tag{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#4a3324;border:2px solid #8b5a2b;border-radius:10px;padding:0 7px;font-size:clamp(9px,1.7cqw,14px);animation:tg 1.6s infinite}
+.actor:has(.tag){cursor:pointer}
+.ch{display:block;width:100%;overflow:visible}
+.mt,.mh,.ms,.mk,.eh,.sw,.tb{display:none}
+.talk .mn,.happy .mn,.shock .mn,.think .mn{display:none}
+.talk .mt{display:block;transform-origin:30px 41px;animation:tk .22s infinite alternate}
+.happy .mh,.happy .eh{display:block}.happy .eyes{display:none}
+.shock .ms,.shock .sw{display:block}.shock .eyes{transform:scale(1.35);transform-origin:30px 31px}
+.think .mk,.think .tb{display:block}
+.bod{transform-origin:30px 88px}.hat{transform-origin:30px 14px}.a1{transform-origin:13px 52px}.a2{transform-origin:47px 52px}
+.idle .bod{animation:bob 2.4s ease-in-out infinite}
+.i-owner .bod{animation:nod 3s ease-in-out infinite}
+.i-barista .bod{animation:sway 2.6s ease-in-out infinite}
+.i-chef .a2{animation:stir .5s infinite alternate}.i-chef .hat{animation:hat 2s infinite}
+.i-cashier .a1{animation:tap .7s infinite}
+.walk .bod{animation:wob .4s infinite alternate}
+.walk .l1{animation:lg .4s infinite alternate}.walk .l2{animation:lg .4s infinite alternate-reverse}
+.happy .bod{animation:jump .5s 3}
+.shock .bod{animation:shk .12s 6}.shock .hat{animation:pop .25s 3}
+#dlg{position:absolute;left:3%;right:3%;bottom:3%;z-index:200;background:var(--card);color:var(--ink);border:3px solid #8b5a2b;border-radius:16px;padding:8px 14px;box-shadow:0 5px 0 #0003}
+#dlg p{margin:2px 0}
+#start{position:absolute;inset:0;z-index:300;background:#2a1f18e6;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;gap:8px}
+#start h2{font-size:clamp(22px,5vw,40px);margin:0}
+#pnl{position:fixed;inset:0;z-index:500;background:#000b;display:flex;align-items:center;justify-content:center;padding:8px}
+.pn{position:relative;background:var(--card);color:var(--ink);border:4px solid #8b5a2b;border-radius:20px;width:min(760px,100%);max-height:96vh;overflow:auto;padding:12px}
+.x{position:absolute;right:8px;top:6px;border:0;background:none;font-size:20px;cursor:pointer;color:var(--ink)}
+.pt{display:flex;align-items:flex-end;gap:8px;margin-right:22px}
+.av{width:70px;flex:none}
+.bub{flex:1;background:#fff;color:#4a3324;border:2px solid var(--line);border-radius:14px;padding:8px 12px;min-height:64px}
+.ex,.hint{border-radius:14px;padding:8px 12px;margin:8px 0}
+.ex{background:#e6f7e3;color:#1d4a2a;border:2px solid #5aa469;animation:pop .5s}
+.hint{background:#fff3c4;color:#5a4300;border:2px solid #e0b93a}
+.cups{display:flex;gap:min(4vw,24px);justify-content:center;padding:16px 4px 4px}
+.cw{text-align:center}
+.cup{width:66px;height:120px;border:3px solid #7a5a3a;border-top:0;border-radius:0 0 22px 22px;background:#fff9;position:relative;overflow:hidden;cursor:grab;touch-action:none}
+.cup::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to top,transparent 0 10.4px,#0002 10.4px 11.4px)}
+.cup.ok{animation:glow 1s infinite alternate}
+.liq{position:absolute;bottom:0;left:0;width:100%;background:#6f4e37;transition:height 1s ease}
+.liq::before{content:"";position:absolute;top:-5px;left:-15%;width:130%;height:10px;background:#8a6248;border-radius:50%;animation:wv 1.4s linear infinite alternate}
+.ghost{cursor:grabbing;filter:drop-shadow(0 8px 6px #0004)}
+.stream{position:fixed;width:8px;border-radius:4px;z-index:998;transition:height .35s linear;background:repeating-linear-gradient(180deg,#8a5a3a 0 10px,#6f4e37 10px 18px);animation:fl .2s linear infinite}
+.cards{display:flex;gap:min(2.5vw,10px);justify-content:center;padding:18px 0 8px}
+.card{width:min(72px,16vw);height:96px;background:#fff;color:#4a3324;border:3px solid #d9622b;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;font-size:22px;line-height:1.1;transition:transform .3s}
+.card small{font-size:11px}
+.card.no{border-color:#d33;background:#ffe3e3}.card.dim{opacity:.45}
+.card.mid{transform:scale(1.18);background:#fff2a8;animation:glow .8s infinite alternate}
+.lab{display:flex;justify-content:space-between;font-size:14px;margin:0 6px}
+.pile{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:8px;min-height:60px;background:#0001;border-radius:12px}
+.oc{background:#fff;color:#4a3324;border:2px solid #d9622b;border-radius:10px;padding:2px 6px;cursor:grab;touch-action:none;user-select:none;font-size:13px;width:92px;text-align:center;line-height:1.2}
+.trays{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.tray{border:3px dashed #8b5a2b;border-radius:14px;min-height:130px;padding:6px;text-align:center;background:#fff5}
+.tray.win{background:#fff2a8;border-style:solid;animation:glow .8s infinite alternate;color:#4a3324}
+.tray.sh{animation:shk .12s 4}
+.tray .in{font-size:20px;min-height:28px;word-break:break-all}
+.bar{height:10px;background:#0002;border-radius:6px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;width:0;background:#d9622b;transition:width .8s}
+@keyframes bob{50%{transform:translateY(-2px) scaleY(1.02)}}
+@keyframes wob{from{transform:rotate(-4deg)}to{transform:rotate(4deg) translateY(-3px)}}
+@keyframes lg{to{transform:translateY(-4px)}}
+@keyframes jump{50%{transform:translateY(-14px)}}
+@keyframes shk{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@keyframes nod{50%{transform:rotate(2.5deg)}}
+@keyframes sway{50%{transform:translateX(3px)}}
+@keyframes stir{to{transform:rotate(-28deg)}}
+@keyframes tap{50%{transform:rotate(22deg)}}
+@keyframes hat{50%{transform:rotate(-6deg)}}
+@keyframes pop{50%{transform:translateY(-8px) scale(1.04)}}
+@keyframes glow{to{box-shadow:0 0 22px 6px #ffd23f}}
+@keyframes tk{to{transform:scaleY(.35)}}
+@keyframes wv{to{transform:translateX(12%)}}
+@keyframes fl{to{background-position:0 18px}}
+@keyframes tg{50%{transform:translateX(-50%) translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.tag,.idle .bod{animation:none}}
+</style></head><body><div id="app">
+<header><h1>☕ Petualangan di Data Café</h1><div class="row" style="margin:0"><button id="toggleSnd" class="chip on">🔊 Suara</button><button id="toggleMusic" class="chip on">🎵 Musik</button></div></header>
+<div class="row" id="chips" style="margin-top:4px"></div>
+<div id="scene">
+<div class="win" style="left:5%"></div><div class="win" style="left:22%"></div><div class="board">MENU<br>☕ 🥐 🍵</div><div class="win" style="left:80%"></div>
+<div class="ctr" style="left:2%;width:27%"><i>🫖☕</i></div><div class="ctr" style="left:37%;width:27%"><i>🍰🎂</i></div><div class="ctr" style="left:71%;width:27%"><i>🧾💰</i></div>
+<span class="dc" style="left:0;top:74%">🪴</span><span class="dc" style="right:0;top:74%">🪴</span>
+<div id="dlg" hidden></div>
+<div id="start"><h2>☕ Petualangan di Data Café</h2><p>Jadilah Detektif Data dan pecahkan tiga misteri data di café yang hangat ini!</p><button class="b" id="go">Mulai petualangan</button></div>
+</div>
+<p class="tip">Klik Barista, Chef, atau Kasir untuk berjalan ke sana dan mulai misi. Klik lantai untuk berjalan bebas.</p>
+</div>
+<div id="pnl" hidden></div>
+<script>
+const $=s=>document.querySelector(s),sk=['#ffd9b3','#f1c27d','#c68642','#8d5524'];
+let sndOn=true,musicOn=true,AC=null,musicTimer=null;
+function ac(){return AC||(AC=new (window.AudioContext||window.webkitAudioContext)())}
+function tone(freq,dur=.15,type='sine',vol=.2,delay=0){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);const t=c.currentTime+delay;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur+.02)}catch(e){}}
+function beep(...a){if(sndOn)tone(...a)}
+function sfxClick(){beep(500,.06,'square',.15)}
+function sfxGood(){beep(523,.12,'sine',.2);beep(659,.12,'sine',.2,.12);beep(784,.18,'sine',.22,.24)}
+function sfxBad(){beep(200,.18,'sawtooth',.18);beep(160,.22,'sawtooth',.18,.15)}
+function noiseBurst(dur=.3,vol=.15,freq=800){try{const c=ac(),n=Math.max(1,Math.floor(c.sampleRate*dur)),buf=c.createBuffer(1,n,c.sampleRate),data=buf.getChannelData(0);for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*(1-i/n);const src=c.createBufferSource();src.buffer=buf;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=.9;const g=c.createGain();g.gain.value=sndOn?vol:0;src.connect(f);f.connect(g);g.connect(c.destination);src.start()}catch(e){}}
+function sfxPour(){if(!sndOn)return;noiseBurst(.4,.12,900);tone(280,.3,'sine',.05,.05)}
+function sfxWin(){[523,659,784,1046].forEach((f,i)=>beep(f,.22,'sine',.24,i*.13))}
+function startMusic(){if(musicTimer)return;const chords=[[261.6,329.6,392],[293.7,349.2,440],[220,277.2,329.6],[246.9,311.1,392]];let i=0;const tick=()=>{if(!musicOn)return;chords[i%chords.length].forEach((f,j)=>tone(f,3.6,'sine',.045,j*.05));i++};tick();musicTimer=setInterval(tick,4000)}
+function stopMusic(){clearInterval(musicTimer);musicTimer=null}
+$('#toggleSnd').onclick=function(){sndOn=!sndOn;this.classList.toggle('on',sndOn);if(!sndOn&&window.speechSynthesis)speechSynthesis.cancel()};
+$('#toggleMusic').onclick=function(){musicOn=!musicOn;this.classList.toggle('on',musicOn);if(musicOn)startMusic();else stopMusic()};
+document.addEventListener('click',e=>{if(e.target.closest('.b, .chip'))sfxClick()});
+const VOICE={owner:{pitch:.9,rate:.95},barista:{pitch:1.15,rate:1.05},chef:{pitch:.8,rate:.95},cashier:{pitch:1.3,rate:1.1},cust:{pitch:1.05,rate:1},me:{pitch:1.2,rate:1.05}};
+function pickVoice(id){if(!window.speechSynthesis)return null;const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('id'));if(!vs.length)return null;let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;return vs[h%vs.length]}
+function speak(html,id){if(!sndOn||!window.speechSynthesis)return;const d=document.createElement('div');d.innerHTML=html;const t=(d.textContent||'').trim();if(!t)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';const v=VOICE[id]||{};u.pitch=v.pitch||1;u.rate=v.rate||1;const vv=pickVoice(id||'');if(vv)u.voice=vv;speechSynthesis.speak(u)}
+const FN={owner:'Bu Rina (Pemilik Café)',barista:'Barista Bimo',chef:'Chef Cika',cashier:'Kasir Kiki',cust:'Pelanggan'},NM={owner:'Pemilik',barista:'Barista',chef:'Chef',cashier:'Kasir'},T={barista:'mean',chef:'median',cashier:'mode'};
+const CON={mean:'☕ <b>Mean</b> (rata-rata) = jumlah semua data ÷ banyak data. Seperti membagi kopi sama rata ke semua gelas.',median:'🎂 <b>Median</b> = nilai tengah dari data yang sudah diurutkan dari terkecil ke terbesar.',mode:'🧾 <b>Modus</b> = data yang paling sering muncul (frekuensi tertinggi).'};
+let done={};
+const H=c=>`<path d="M11 31q-3-26 19-26t19 26q-5-12-19-12t-19 12z" fill="${c}"/>`;
+const CD={
+me:{r:'me',b:'#4a90d9',h:H('#2f2118')+'<path d="M12 20q18-15 36 0z" fill="#9a7440"/><rect x="9" y="19" width="42" height="4" rx="2" fill="#6b4f2a"/>',x:'<rect x="36" y="60" width="16" height="15" rx="3" fill="#8b5a2b"/><path d="M15 47l22 20" stroke="#8b5a2b" stroke-width="3"/><rect x="1" y="58" width="13" height="17" rx="2" fill="#3fae7a"/><rect x="3" y="61" width="9" height="2" fill="#fff"/>'},
+owner:{r:'owner',b:'#a874c0',h:'<circle cx="30" cy="7" r="7" fill="#d9d9e2"/>'+H('#d9d9e2')+'<circle cx="23" cy="31" r="6.5" fill="none" stroke="#444" stroke-width="1.5"/><circle cx="37" cy="31" r="6.5" fill="none" stroke="#444" stroke-width="1.5"/>',x:'<rect x="20" y="52" width="20" height="26" rx="6" fill="#fff" opacity=".8"/>'},
+barista:{r:'barista',b:'#f2e4c9',s:sk[1],h:H('#6b3f2a')+'<rect x="11" y="17" width="38" height="4" rx="2" fill="#3fae7a"/>',x:'<rect x="19" y="52" width="22" height="26" rx="6" fill="#2f7d55"/><rect x="25" y="58" width="10" height="7" rx="2" fill="#1f5a3c"/>'},
+chef:{r:'chef',b:'#fff',s:sk[2],h:'<g class="hat"><rect x="17" y="6" width="26" height="14" rx="3" fill="#fff" stroke="#ddd"/><ellipse cx="30" cy="6" rx="15" ry="8" fill="#fff" stroke="#ddd"/></g>',x:'<circle cx="30" cy="56" r="1.8" fill="#bbb"/><circle cx="30" cy="63" r="1.8" fill="#bbb"/><circle cx="30" cy="70" r="1.8" fill="#bbb"/>'},
+cashier:{r:'cashier',b:'#d9463e',h:H('#1a1a1a')+'<path d="M11 21q19-13 38 0z" fill="#f0a03c"/>',x:'<path d="M26 47l4 5 4-5z" fill="#fff"/>'},
+c0:{r:'cust',b:'#7fb7e6',s:sk[3],h:H('#111')},
+c1:{r:'cust',b:'#f4a6c0',s:sk[1],h:H('#e0a030')+'<circle cx="10" cy="26" r="6" fill="#e0a030"/><circle cx="50" cy="26" r="6" fill="#e0a030"/>'},
+c2:{r:'cust',b:'#b6d97a',s:sk[0],h:H('#7a4a2a')}};
+CD.cust=CD.c1;
+function CH(id){const c=CD[id];return `<svg class="ch idle i-${c.r}" data-id="${id}" viewBox="0 0 60 92"><g class="bod"><rect class="l1" x="19" y="74" width="8" height="14" rx="4" fill="#5b4636"/><rect class="l2" x="33" y="74" width="8" height="14" rx="4" fill="#5b4636"/><rect class="a1" x="8" y="50" width="9" height="22" rx="4.5" fill="${c.b}"/><rect class="a2" x="43" y="50" width="9" height="22" rx="4.5" fill="${c.b}"/><rect x="15" y="46" width="30" height="32" rx="11" fill="${c.b}"/>${c.x||''}<circle cx="30" cy="30" r="19" fill="${c.s||sk[0]}"/>${c.h}<g class="eyes"><circle cx="23" cy="31" r="3" fill="#222"/><circle cx="37" cy="31" r="3" fill="#222"/><circle cx="24" cy="30" r="1" fill="#fff"/><circle cx="38" cy="30" r="1" fill="#fff"/></g><path class="eh" d="M19 33q4-7 8 0M33 33q4-7 8 0" stroke="#222" fill="none" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="38" r="3" fill="#ff8f9a" opacity=".55"/><circle cx="44" cy="38" r="3" fill="#ff8f9a" opacity=".55"/><path class="mn" d="M25 40q5 4 10 0" stroke="#7a3b2e" fill="none" stroke-width="2" stroke-linecap="round"/><ellipse class="mt" cx="30" cy="41" rx="4" ry="3.5" fill="#7a3b2e"/><path class="mh" d="M23 38q7 11 14 0z" fill="#7a3b2e"/><ellipse class="ms" cx="30" cy="42" rx="3" ry="5" fill="#7a3b2e"/><path class="mk" d="M26 41h8" stroke="#7a3b2e" stroke-width="2" stroke-linecap="round"/><path class="sw" d="M49 20q4 6 0 9q-4-3 0-9z" fill="#7ec8f7"/><g class="tb"><circle cx="52" cy="9" r="8" fill="#fff" stroke="#999"/><text x="52" y="13" font-size="11" text-anchor="middle" fill="#555">?</text></g></g></svg>`}
+function react(id,ex,ms=1500){document.querySelectorAll(`.ch[data-id="${id}"]`).forEach(s=>{s.classList.remove('happy','shock','think','talk');s.classList.add(ex);setTimeout(()=>s.classList.remove(ex),ms)})}
+const S=$('#scene'),A={};
+function mk(id,x,y,w,tag){const d=document.createElement('div');d.className='actor';d.dataset.id=id;d.style.cssText=`left:${x}%;top:${y}%;z-index:${Math.round(y)};width:${w}%`;d.innerHTML=(tag?`<div class="tag" id="tag-${id}"></div>`:'')+`<div class="fl">${CH(id)}</div>`;S.append(d);return A[id]={el:d,x,y,tm:0,sp:30,f:1}}
+function go(a,x,y,cb){const dx=x-a.x,t=Math.max(Math.hypot(dx,y-a.y)/a.sp,.05);if(Math.abs(dx)>.5)a.f=dx<0?-1:1;a.el.querySelector('.fl').style.transform=`scaleX(${a.f})`;const s=a.el.style;s.transition=`left ${t}s linear,top ${t}s linear`;s.left=x+'%';s.top=y+'%';s.zIndex=Math.round(y);a.x=x;a.y=y;const v=a.el.querySelector('svg');v.classList.add('walk');clearTimeout(a.tm);a.tm=setTimeout(()=>{v.classList.remove('walk');cb&&cb()},t*1000+40)}
+['owner','barista','chef','cashier'].forEach((k,i)=>mk(k,[40,14,50,84][i],[86,62,62,62][i],8,1));
+const me=mk('me',10,92,8.5);
+['c0','c1','c2'].forEach((id,i)=>{const a=mk(id,22+i*26,84+i*3,7);a.sp=9;(function l(){go(a,6+Math.random()*88,80+Math.random()*13);setTimeout(l,3500+Math.random()*5000)})()});
+function unlocked(id){if(id=='barista'||id=='owner')return true;if(id=='chef')return !!done.mean;if(id=='cashier')return !!done.median;return true}
+function tags(){for(const k in NM){const u=unlocked(k);$('#tag-'+k).textContent=NM[k]+(T[k]?(done[T[k]]?' ✓':u?' ❗':' 🔒'):'')}}
+function chips(){$('#chips').innerHTML='<span>📖 Buku Data:</span>'+[['mean','☕ Mean'],['median','🎂 Median'],['mode','🧾 Modus']].map(([k,l])=>`<button class="chip${done[k]?' on':''}" data-k="${k}">${l}${done[k]?' ✓':''}</button>`).join('')}
+$('#chips').onclick=e=>{const k=e.target.dataset.k;if(!k||busy())return;dlg('owner',done[k]?CON[k]:'Halaman ini masih terkunci. Selesaikan misinya dulu, Detektif!',[['Oke',0]])};
+const busy=()=>!$('#dlg').hidden||!$('#pnl').hidden||!$('#start').hidden;
+function dlg(id,t,bs){const D=$('#dlg');D.hidden=false;D.innerHTML=`<b>${FN[id]}</b><p>${t}</p><div class="row"></div>`;bs.forEach(([l,f])=>{const b=document.createElement('button');b.className='b';b.textContent=l;b.onclick=()=>{if(window.speechSynthesis)speechSynthesis.cancel();D.hidden=true;f&&f()};D.lastChild.append(b)});react(id,'talk',Math.min(2800,t.length*35));speak(t,id)}
+S.onclick=e=>{if(busy())return;const t=e.target.closest('.actor'),id=t&&t.dataset.id;if(id&&FN[id]){const a=A[id];go(me,Math.min(94,a.x+9),Math.max(a.y+18,80),()=>talk(id));return}
+const r=S.getBoundingClientRect();go(me,Math.min(95,Math.max(5,(e.clientX-r.left)/r.width*100)),Math.min(95,Math.max(74,(e.clientY-r.top)/r.height*100)))};
+const INTRO={barista:'Hai, aku Bimo! Aku punya 4 gelas kopi dengan isi yang berbeda-beda. Bantu aku membuat semuanya sama banyak, ya!',chef:'Halo, Chef Cika di sini! Waktu pembuatan 5 kue ini masih berantakan. Bantu aku mengurutkannya!',cashier:'Hai, aku Kiki! Kartu pesanan pelanggan menumpuk. Bantu aku mengelompokkannya berdasarkan menu!'};
+const START={barista:()=>mean(),chef:()=>median(),cashier:()=>modeIntro()};
+const THX={mean:'Terima kasih, Detektif! Kopinya rata dan pelanggan senang. ☕',median:'Hore! Sekarang aku tahu waktu tengah pembuatan kueku. 🎂',mode:'Mantap! Sekarang jelas menu favorit pelanggan kita. 🧾'};
+function nDone(){return ['mean','median','mode'].filter(k=>done[k]).length}
+function talk(id){if(id=='owner'){const n=nDone();if(n==3)return done.final?finale():finalChallenge();const l=Object.keys(T).filter(k=>!done[T[k]]).map(k=>NM[k]).join(', ');return dlg('owner',`Misi selesai: ${n} dari 3. Urutan berikutnya: <b>${l}</b>.`,[['Oke',0]])}
+if(!unlocked(id))return dlg(id,'🔒 Misi ini masih terkunci. Selesaikan misi sebelumnya dulu, ya, Detektif!',[['Baik',0]]);
+if(done[T[id]])return dlg(id,'Misi ini sudah selesai! Mau mengulanginya?',[['Ulangi',START[id]],['Tidak',0]]);
+dlg(id,INTRO[id],[['Mulai misi! 🚀',START[id]],['Nanti dulu',0]])}
+function cheer(){['c0','c1','c2','me'].forEach(i=>react(i,'happy',1800))}
+function complete(k,id){done[k]=1;$('#pnl').hidden=true;tags();chips();cheer();react(id,'happy',2000);dlg(id,THX[k],[['Lanjut',()=>{if(nDone()==3){done.final?finale():finalChallenge()}}]])}
+const FD=[4,6,4,8,3];
+const FQ=[{q:'Berapa <b>mean</b> (rata-rata) pengunjung selama 5 hari?',opts:['3','5','8'],a:'5'},{q:'Berapa <b>median</b> (nilai tengah) dari data tersebut setelah diurutkan?',opts:['3','4','6'],a:'4'},{q:'Berapa <b>modus</b> (nilai yang paling sering muncul)?',opts:['3','4','8'],a:'4'}];
+function finalChallenge(){openP('owner','','',[]);chat('owner',['🏆 Detektif Data, kamu sudah menyelesaikan tiga misi! Sebelum jadi <b>Detektif Data Terbaik</b>, ada satu tantangan terakhir.',`Selama 5 hari terakhir, jumlah pengunjung Data Café tercatat: <b>${FD.join(', ')}</b> orang.`,'Ayo jawab tiga pertanyaan tentang data ini!'],'Mulai Tantangan! 🚀',()=>fq(0))}
+function fq(i){if(i>=FQ.length)return finalDone();const Q=FQ[i];say('owner',`Soal ${i+1}/3: ${Q.q}`);$('#act').innerHTML='<div class="row" id="fo" style="flex-direction:column;align-items:stretch;gap:8px"></div>';$('#fo').innerHTML=Q.opts.map(o=>`<button class="b" style="text-align:left">${o}</button>`).join('');setBtns([]);
+[...$('#fo').children].forEach(b=>b.onclick=()=>{if(b.textContent==Q.a){good('owner','🎉 Tepat sekali!');setBtns([['Lanjut ▶',()=>fq(i+1)]])}else{bad('owner','Belum tepat, coba hitung lagi ya!')}})}
+function finalDone(){done.final=1;finale()}
+function finale(){cheer();sfxWin();dlg('owner','🏆 <b>Detektif Data Terbaik!</b> Kamu berhasil menuntaskan misi Mean, Median, Modus, dan Tantangan Akhir. Ringkasan Buku Data:<br>'+Object.values(CON).join('<br>'),[['🔁 Main lagi',()=>{done={};tags();chips()}],['Tutup',0]])}
+$('#go').onclick=()=>{ac().resume().catch(()=>{});if(musicOn)startMusic();$('#start').hidden=true;tags();chips();dlg('owner','Selamat datang di <b>Data Café</b>, Detektif Data! Café kami sedang dilanda tiga misteri data: Mean, Median, dan Modus.',[['Lanjut ▶',()=>dlg('owner','Kamu akan menemui <b>Barista, Chef,</b> lalu <b>Kasir</b> secara berurutan. Selesaikan misi <b>Mean</b> dulu, baru misi <b>Median</b> terbuka, lalu <b>Modus</b>. 🔒➡🔓',[['Siap, Bu! 🕵️',0]])]])};
+tags();chips();
+/* ---------- panel & drag ---------- */
+function openP(id,t,body,bs){const P=$('#pnl');P.hidden=false;P.innerHTML=`<div class="pn"><button class="x" aria-label="Tutup" onclick="if(window.speechSynthesis)speechSynthesis.cancel();$('#pnl').hidden=true">✕</button><div class="pt"><div class="av" id="avL">${CH(id)}</div><div class="bub" id="bub"></div><div class="av">${CH('me')}</div></div><div id="act">${body}</div><div class="row" id="btns"></div></div>`;say(id,t);setBtns(bs)}
+function say(id,t){const av=document.getElementById('avL');if(av)av.innerHTML=CH(id);$('#bub').innerHTML=t;react(id,'talk',Math.min(2600,t.length*35));speak(t,id)}
+function setBtns(bs){const B=$('#btns');B.innerHTML='';bs.forEach(([l,f])=>{const b=document.createElement('button');b.className='b';b.textContent=l;b.onclick=f;B.append(b)})}
+const good=(id,t)=>{say(id,t);react(id,'happy',2000);react('me','happy',2000);cheer();sfxGood()};
+const bad=(id,t)=>{say(id,t);react(id,'shock',900);react('me','think',1800);react('c'+(Math.random()*3|0),'shock',900);sfxBad()};
+function drag(el,cb){el.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();const r=el.getBoundingClientRect(),g=el.cloneNode(true);g.classList.add('ghost');g.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:999;pointer-events:none`;document.body.append(g);el.style.opacity=.25;const dx=e.clientX-r.left,dy=e.clientY-r.top;
+const mv=v=>{g.style.left=v.clientX-dx+'px';g.style.top=v.clientY-dy+'px'},up=v=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);el.style.opacity=1;cb(v.clientX,v.clientY,g,el)};addEventListener('pointermove',mv);addEventListener('pointerup',up)})}
+/* ---------- MEAN: hanya data kopi ---------- */
+function chat(id,lines,finalLabel,onFinal){let i=0;const show=()=>{const cur=lines[i],[sid,txt]=Array.isArray(cur)?cur:[id,cur];say(sid,txt);setBtns(i<lines.length-1?[['Lanjut ▶',()=>{i++;show()}]]:[[finalLabel,onFinal]])};show()}
+function staticCups(a){return a.map(n=>`<div class="cw"><div class="cup"><div class="liq" style="height:${n*10}%"></div></div><b>${n} bagian</b></div>`).join('')}
+function mean(){
+openP('barista','','<div class="cups">'+staticCups([2,4,6,8])+'</div>',[]);
+chat('barista',[['cust','<b>Pelanggan:</b> "Kok minuman kami jumlahnya berbeda?"'],'<b>Bimo:</b> "Waduh, bagaimana ya supaya minuman ini bisa dibagi secara adil kepada semua pelanggan?"','<b>Bimo:</b> "Bisakah kamu membantu Bimo membagi seluruh isi minuman agar setiap pelanggan mendapatkan jumlah yang sama?"'],'Ayo bantu Bimo! 🚀',act1);}
+function act1(){let a=[2,4,6,8],tgt=a.reduce((x,y)=>x+y)/a.length,lock=0;
+$('#act').innerHTML='<div class="cups" id="cups"></div><div class="hint" id="hn" hidden></div>';
+say('barista','Bantu Bimo menyamakan isi ke-4 gelas ini ya! <b>Seret</b> gelas yang lebih penuh ke gelas yang lebih sedikit.');
+setBtns([['💡 Apa yang kurang?',hint],['↺ Ulangi',()=>{if(lock)return;a=[2,4,6,8];render();$('#hn').hidden=true}]]);render();
+function render(){const c=$('#cups');c.innerHTML=a.map((n,i)=>`<div class="cw"><div class="cup" data-i="${i}"><div class="liq" style="height:${n*10}%"></div></div><b>${n} bagian</b></div>`).join('');c.querySelectorAll('.cup').forEach(el=>drag(el,(x,y,g)=>pour(+el.dataset.i,x,y,g)))}
+function pour(s,x,y,g){const t=document.elementFromPoint(x,y)?.closest('.cup'),ti=t?+t.dataset.i:-1;if(lock||ti<0||ti==s){g.remove();return}
+if(a[s]<=a[ti]||a[ti]>=12){g.remove();render();bad('barista','Hmm, belum tepat! Tuang dari gelas yang <b>lebih penuh</b> ke gelas yang <b>lebih sedikit</b>.');return}
+lock=1;const tr=t.getBoundingClientRect(),sr=document.querySelector(`.cup[data-i="${s}"]`).getBoundingClientRect(),d=tr.left>sr.left?1:-1,cx=tr.left+tr.width/2;sfxPour();
+g.style.transition='left .4s,top .4s,transform .4s';g.style.left=cx-33-d*65+'px';g.style.top=tr.top-70+'px';g.style.transform=`rotate(${d*40}deg)`;
+setTimeout(()=>{const st=document.createElement('div'),top=tr.top-30,end=tr.bottom-4-(a[ti]+1)*11.4;st.className='stream';st.style.cssText=`left:${cx-4}px;top:${top}px;height:0`;document.body.append(st);requestAnimationFrame(()=>st.style.height=Math.max(10,end-top)+'px');
+g.querySelector('.liq').style.height=(a[s]-1)*10+'%';t.querySelector('.liq').style.height=(a[ti]+1)*10+'%';a[s]--;a[ti]++;
+setTimeout(()=>{st.remove();g.style.opacity=0;setTimeout(()=>{g.remove();lock=0;render();if(a.every(v=>v==a[0]))win()},250)},1050)},430)}
+function hint(){const h=$('#hn');h.hidden=false;h.className='hint';h.innerHTML=`Total minuman = <b>20 bagian</b> ÷ 4 gelas = <b>${tgt} bagian</b> per gelas.<br>`+a.map((n,i)=>`Gelas ${i+1}: ${n<tgt?'kurang '+(tgt-n):n>tgt?'kelebihan '+(n-tgt):'sudah pas ✓'}`).join(' · ');say('barista','Gelas yang <b>kelebihan</b> memberi, gelas yang <b>kurang</b> menerima.')}
+function win(){lock=1;sfxWin();document.querySelectorAll('#cups .cup').forEach(c=>c.classList.add('ok'));good('barista','Semua gelas sama banyak! Kerja bagus, Detektif! 🎉');setTimeout(tahu1,1200)}}
+function tahu1(){openP('barista','💡 <b>Tahukah Kamu?</b> ✨<br>Kamu baru saja melakukan aktivitas untuk mencari <b>mean (rata-rata)</b>, loh!<br>Saat membantu Bimo membagi seluruh isi gelas menjadi sama banyak, kamu sebenarnya sedang mencari nilai yang dapat mewakili seluruh data secara adil.<br>Jadi, <b>mean (rata-rata)</b> adalah nilai yang diperoleh ketika seluruh data dibagi secara merata sesuai dengan banyaknya data.','',[['Lanjut ke Aktivitas 2 ▶',act2]])}
+function act2(){let src=[2,4,6,8],total=0,lock=0;
+openP('barista','Sekarang kita coba cara lain. <b>Langkah 1:</b> Tuangkan seluruh isi setiap gelas ke wadah besar ini, satu per satu.',`<div style="display:flex;align-items:flex-end;justify-content:center;gap:20px;padding:10px 0"><div class="cups" id="src"></div><div class="cw"><div class="cup" id="disp" style="width:80px;height:150px"><div class="liq" id="dispL" style="height:0%"></div></div><b id="dispT">Total: 0</b></div></div>`,[]);
+renderSrc();
+function renderSrc(){$('#src').innerHTML=src.map((n,i)=>n==null?'':`<div class="cw"><div class="cup" data-i="${i}"><div class="liq" style="height:${n*10}%"></div></div><b>${n}</b></div>`).join('');document.querySelectorAll('#src .cup').forEach(el=>drag(el,(x,y,g)=>{g.remove();if(lock)return;const disp=document.getElementById('disp'),r=disp.getBoundingClientRect();if(x<r.left-30||x>r.right+30||y<r.top-50)return;const i=+el.dataset.i;total+=src[i];src[i]=null;renderSrc();sfxPour();document.getElementById('dispL').style.height=Math.min(100,total*5)+'%';document.getElementById('dispT').textContent='Total: '+total;react('barista','happy',600);if(src.every(v=>v==null))step2()}))}
+function step2(){say('barista',`Mantap, semua terkumpul jadi <b>${total}</b>! <b>Langkah 2:</b> Seret wadah besar ke tiap gelas kosong untuk membagikannya secara merata.`);const each=total/4;let filled=0;
+$('#act').innerHTML=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:20px;padding:10px 0"><div class="cw"><div class="cup" id="disp2" style="width:80px;height:150px"><div class="liq" style="height:${total*5}%"></div></div><b id="dispT2">Total: ${total}</b></div><div class="cups" id="dst"></div></div>`;
+renderDst();function renderDst(){$('#dst').innerHTML=[0,1,2,3].map(i=>`<div class="cw"><div class="cup" data-i="${i}"><div class="liq" style="height:${(i<filled?each:0)*10}%"></div></div><b>${i<filled?each:'?'}</b></div>`).join('')}
+drag(document.getElementById('disp2'),(x,y,g)=>{g.remove();if(filled>=4)return;const t=document.elementFromPoint(x,y)?.closest('#dst .cup');if(!t||+t.dataset.i<filled)return;filled++;renderDst();sfxPour();react('barista','happy',500);document.getElementById('disp2').querySelector('.liq').style.height=(total-each*filled)*5+'%';document.getElementById('dispT2').textContent='Total: '+(total-each*filled);if(filled==4)tahu2(each)})}}
+function tahu2(each){say('barista',`Lihat! 2 + 4 + 6 + 8 = 20, lalu 20 dibagi 4 gelas = <b>${each}</b>. Setiap gelas akhirnya berisi sama banyak.`);setBtns([['Lanjut 🤔',reflect]])}
+function reflect(){chat('barista',['💡 <b>Tahukah Kamu?</b> ✨ Kamu sudah mencari mean dengan dua cara berbeda.','Pada aktivitas pertama, kamu membagi isi minuman sedikit demi sedikit sampai sama banyak.','Pada aktivitas kedua, kamu mengumpulkan semua isi dulu, baru membagikannya secara merata.','Menurutmu, bagaimana cara menghitung mean tanpa harus menuang-nuang minuman? 🤔'],'Coba jawab yuk!',mcq)}
+function mcq(){$('#act').innerHTML='<div class="row" style="flex-direction:column;align-items:stretch;gap:8px" id="opts"><button class="b" style="text-align:left" data-v="a">A. Mean = Jumlah seluruh data × Banyak data</button><button class="b" style="text-align:left" data-v="b">B. Mean = Jumlah seluruh data ÷ Banyak data</button><button class="b" style="text-align:left" data-v="c">C. Mean = Banyak data ÷ Jumlah seluruh data</button></div>';setBtns([]);
+document.querySelectorAll('#opts button').forEach(b=>b.onclick=()=>{if(b.dataset.v=='b'){good('barista','🎉 Benar! Untuk mencari mean, jumlah seluruh data dibagi dengan banyaknya data.');$('#opts').insertAdjacentHTML('afterend','<div class="ex" style="margin-top:8px"><b>Mean = Jumlah seluruh data ÷ Banyak data</b></div>');setBtns([['Selesai ✔',()=>complete('mean','barista')]])}else{bad('barista','Belum tepat. Ingat: kamu mengumpulkan dulu (jumlah semua data), baru membaginya dengan banyak gelasnya (banyak data). Coba lagi!')}})}
+/* ---------- MEDIAN: hanya data waktu kue ---------- */
+function median(){let a=[25,10,40,15,30],lock=0;const so=[...a].sort((x,y)=>x-y),ok=()=>a.every((v,i)=>v==so[i]);
+openP('chef','Ini waktu pembuatan 5 kue (menit). <b>Seret kartu</b> untuk mengurutkannya dari <b>paling kecil (kiri)</b> sampai <b>paling besar (kanan)</b>.',`<div class="cards" id="cd"></div><div class="lab" id="lab"><span>⬅ Paling cepat</span><span>Paling lama ➡</span></div><div class="hint" id="hn" hidden></div>`,[['✅ Cek urutan',chk],['💡 Apa yang kurang?',hint],['🔀 Acak lagi',()=>{if(lock)return;do a.sort(()=>Math.random()-.5);while(ok());render();$('#hn').hidden=true}]]);render();
+function render(w=[]){const c=$('#cd');c.innerHTML=a.map((v,i)=>`<div class="card${w[i]?' no':''}" data-i="${i}"><span>🎂</span><b>${v}</b><small>menit</small></div>`).join('');[...c.children].forEach(el=>drag(el,(x,y,g)=>{g.remove();const j=[...c.children].filter(e=>e!==el&&e.getBoundingClientRect().left+e.offsetWidth/2<x).length;a.splice(j,0,a.splice(+el.dataset.i,1)[0]);render();if(ok())win()}))}
+function chk(){if(lock)return;if(ok())return win();bad('chef','Hmm, belum urut. Kartu kecil ke kiri, kartu besar ke kanan. Coba lagi!')}
+function hint(){if(lock)return;const w=a.map((v,i)=>v!=so[i]);render(w);const h=$('#hn');h.hidden=false;h.className='hint';h.innerHTML=`Ada <b>${w.filter(Boolean).length} kartu</b> yang belum di tempat yang tepat (bertanda merah). Cari waktu paling kecil dulu, taruh di kiri, lalu lanjut ke yang berikutnya.`;say('chef','Lihat kartu merah, itu yang masih salah tempat.')}
+function win(){lock=1;sfxWin();const c=$('#cd');c.style.pointerEvents='none';[...c.children].forEach((e,i)=>e.classList.add(i==2?'mid':'dim'));$('#lab').innerHTML='<span>◀ 2 data lebih kecil</span><b>⭐ nilai tengah</b><span>2 data lebih besar ▶</span>';good('chef','Urutannya sempurna! Lihat kartu yang bersinar di tengah! ✨');const h=$('#hn');h.hidden=false;h.className='ex';h.innerHTML=`<b>Kenapa ini median?</b><br>Data terurut: ${so.map((v,i)=>i==2?`<b>${v}</b>`:v).join(', ')}. Ada 5 data, jadi nilai tengahnya data ke-3, yaitu <b>${so[2]} menit</b>.<br><b>Median = nilai tengah dari data yang sudah diurutkan.</b>`;setBtns([['Selesai ✔',()=>complete('median','chef')]])}}
+/* ---------- MODUS: hanya data pilihan menu ---------- */
+function modeIntro(){openP('cashier','','',[]);chat('cashier',['<b>Kiki:</b> "Waduh, kartu pesanan pelanggan menumpuk banyak sekali hari ini!"','<b>Kiki:</b> "Aku jadi bingung, menu apa ya yang paling sering dipesan pelanggan kita?"','<b>Kiki:</b> "Bisakah kamu bantu aku mengelompokkan kartu-kartu ini berdasarkan jenis menunya dulu?"'],'Ayo bantu Kiki! 🚀',mode)}
+function mode(){const M={L:['☕','Latte'],C:['🥐','Croissant'],T:['🍵','Teh Hijau']};let pile=[...'LCLTLCTLC'].map((k,i)=>({k,n:i+1})),got={L:[],C:[],T:[]},lock=0;
+openP('cashier','Seret setiap kartu pesanan ke baki menu yang sesuai. Setelah semua rapi, aku akan menghitung frekuensinya!',`<div class="pile" id="pile"></div><div class="trays" id="trays"></div><div class="hint" id="hn" hidden></div>`,[['💡 Apa yang kurang?',hint]]);render();
+function render(){$('#pile').innerHTML=pile.map(o=>`<div class="oc" data-n="${o.n}">📝 Pesanan #${o.n}<br><b>${M[o.k][0]} ${M[o.k][1]}</b></div>`).join('');$('#trays').innerHTML=Object.keys(M).map(k=>`<div class="tray" data-k="${k}"><b>${M[k][0]} ${M[k][1]}</b><div class="in">${M[k][0].repeat(got[k].length)}</div><div class="cnt">Frekuensi: ?</div><div class="bar"><i></i></div></div>`).join('');document.querySelectorAll('.oc').forEach(el=>drag(el,(x,y,g)=>{g.remove();if(lock)return;const tr=document.elementFromPoint(x,y)?.closest('.tray');if(!tr)return;const o=pile.find(p=>p.n==el.dataset.n);
+if(tr.dataset.k!=o.k){tr.classList.add('sh');setTimeout(()=>tr.classList.remove('sh'),600);bad('cashier',`Pesanan #${o.n} adalah <b>${M[o.k][1]}</b>, bukan ${M[tr.dataset.k][1]}. Cek lagi nama menunya!`);return}
+pile=pile.filter(p=>p!==o);got[o.k].push(o.n);render();react('cashier','happy',700);if(!pile.length)count()}))}
+function hint(){if(lock)return;const r={};pile.forEach(o=>r[o.k]=(r[o.k]||0)+1);const h=$('#hn');h.hidden=false;h.className='hint';h.innerHTML=pile.length?`Masih ada <b>${pile.length} pesanan</b> di tumpukan: ${Object.keys(r).map(k=>M[k][0]+' '+M[k][1]+' ×'+r[k]).join(', ')}. Cocokkan nama menu di kartu dengan judul baki.`:'Semua sudah dikelompokkan!';say('cashier','Kartu yang tersisa perlu dimasukkan ke baki menu yang sama.')}
+function count(){lock=1;say('cashier','Semua rapi! Sekarang kuhitung frekuensi tiap menu...');const ks=Object.keys(M),mx=Math.max(...ks.map(k=>got[k].length));document.querySelectorAll('.tray').forEach((t,i)=>setTimeout(()=>{const n=got[t.dataset.k].length;t.querySelector('.cnt').innerHTML=`Frekuensi: <b>${n}</b>`;t.querySelector('.bar i').style.width=n/mx*100+'%';react('cashier','think',700)},900*(i+1)));
+setTimeout(()=>askMode(ks,mx),900*4+300)}
+function askMode(ks,mx){say('cashier','Coba perhatikan diagram batang di atas. 🤔 Menurutmu, menu mana yang <b>paling sering muncul</b>?');
+setBtns(ks.map(k=>[`${M[k][0]} ${M[k][1]}`,()=>{if(got[k].length==mx){sfxWin();document.querySelector(`.tray[data-k="${k}"]`).classList.add('win');good('cashier',`🎉 Benar! ${M[k][1]} paling banyak dipilih!`);const h=$('#hn');h.hidden=false;h.className='ex';h.innerHTML=`<b>Kenapa ini modus?</b><br>${ks.map(x=>`${M[x][0]} ${M[x][1]}: ${got[x].length}`).join(' · ')}.<br>Data yang <b>paling sering muncul</b> disebut <b>modus</b>. Jadi, modus dari data ini adalah <b>${M[k][0]} ${M[k][1]}</b>.`;setBtns([['Selesai ✔',()=>complete('mode','cashier')]])}else{bad('cashier','Coba lihat lagi diagram batangnya, itu belum yang paling tinggi. Coba pilih lagi!')}}]))}}
+</script></body></html>
